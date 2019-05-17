@@ -15,6 +15,7 @@ void cpu_init(struct cpu *cpu)
   cpu->PC = 0;
   memset(cpu->registers, 0, sizeof(cpu->registers));
   memset(cpu->ram, 0, sizeof(cpu->ram));
+  memset(cpu->FL, 0, sizeof(cpu->FL));
   
 }
 unsigned char cpu_ram_read(struct cpu *cpu, unsigned char MAR)
@@ -121,16 +122,32 @@ void cpu_run(struct cpu *cpu)
         cpu->PC += 3;
         break;
       case JMP:
+        cpu->PC = cpu->registers[operandA]; 
         break;
       case CMP:
-        if(operandA == operandB){
-          printf("reached: %d, %d \n", operandA, operandB);
+        if(cpu->registers[operandA] == cpu->registers[operandB]){
+          cpu->FL[7] = 1;
+        }else if(cpu->registers[operandA] > cpu->registers[operandB]){
+          cpu->FL[6] = 1;
+        }else{
+          cpu->FL[5] = 1;
         }
-
+        cpu->PC += 3;
         break;
       case JEQ:
+        if(cpu->FL[7] ==1){
+          cpu->PC = cpu->registers[operandA]; 
+        }
+        else{
+          cpu->PC+=2;
+        }
         break;
       case JNE:
+        if(cpu->FL[7] ==0){
+          cpu->PC=cpu->registers[operandA];
+        }else{
+          cpu->PC += 2; 
+        } 
         break;
     }
     
